@@ -808,6 +808,102 @@ fn fee_vault_thirty_day_demo_conserves_tokens_and_closes() {
 }
 
 #[test]
+fn six_month_operations_conserve_tokens_and_preserve_loss_high_water_mark() {
+    let mut f = FeeFixture::new();
+    // Fixture capital includes 1,000 invested, 500 for a top-up and 200 for yield backing.
+    mint_account(
+        &mut f.y.svm,
+        f.y.mint,
+        f.y.authority.pubkey(),
+        1700 * USDC,
+        6,
+    );
+    token_account(
+        &mut f.y.svm,
+        f.y.assets,
+        f.y.mint,
+        f.y.client.pubkey(),
+        1700 * USDC,
+    );
+    f.deposit(1000 * USDC);
+    let mut previous_price = SCALE;
+    for (month, percent) in [104, 98, 100, 104, 108, 110].into_iter().enumerate() {
+        let before = f.state();
+        let paid_before = f.paid();
+        f.warp(30 * 86400);
+        if matches!(month, 0 | 3 | 4 | 5) {
+            f.y.fund_yield();
+        }
+        let price = SCALE * percent / 100;
+        f.price(price);
+        f.settle().unwrap();
+        let fees: [u64; 3] = std::array::from_fn(|i| f.paid()[i] - paid_before[i]);
+        // Independent integer oracle includes cash and fractional carry across all six months.
+        let denominator = SCALE * 10_000 * 365 * 86400;
+        for (i, rate) in [40_u128, 60].into_iter().enumerate() {
+            let numerator = (u128::from(before.shares) * previous_price
+                + u128::from(before.cash) * SCALE)
+                * 30
+                * 86400
+                * rate
+                + before.remainders[i];
+            assert_eq!(u128::from(fees[i]), numerator / denominator);
+            assert_eq!(f.state().remainders[i], numerator % denominator);
+        }
+        let performance =
+            u128::from(before.shares) * price.saturating_sub(before.high_water_mark) * 1500
+                + before.remainders[2];
+        assert_eq!(u128::from(fees[2]), performance / (SCALE * 10_000));
+        assert_eq!(f.state().high_water_mark, before.high_water_mark.max(price));
+        if (1..=2).contains(&month) {
+            assert_eq!(fees[2], 0, "No performance fee below the blended mark");
+        }
+        rejected(f.settle(), "NotDue");
+        let action = match month {
+            1 => {
+                f.deposit(500 * USDC);
+                assert_eq!(f.paid(), std::array::from_fn(|i| paid_before[i] + fees[i]));
+                assert!(f.state().high_water_mark < before.high_water_mark);
+                "top-up 500"
+            }
+            3 => {
+                let shares = f.state().shares / 4;
+                let mark = f.state().high_water_mark;
+                let ix = f.client_ix(advisor_fee_vault::instruction::Withdraw {
+                    shares: Some(shares),
+                    min_assets: shares,
+                });
+                send(&mut f.y.svm, &f.y.client, ix).unwrap();
+                assert_eq!(f.state().high_water_mark, mark);
+                "withdraw 25% of shares"
+            }
+            5 => {
+                f.exit();
+                "full exit"
+            }
+            _ => "settle",
+        };
+        let p = f.state();
+        assert_eq!(balance(&f.y.svm, f.cash), p.cash);
+        assert_eq!(balance(&f.y.svm, f.custody), p.shares);
+        let held = balance(&f.y.svm, f.y.assets)
+            + balance(&f.y.svm, f.y.reserve)
+            + balance(&f.y.svm, f.cash)
+            + f.paid().iter().sum::<u64>();
+        assert_eq!(held, 1700 * USDC);
+        println!("month={} price={} fees={fees:?} action={action} shares={} cash={} hwm={} client={} reserve={} conserved={held}",
+            month + 1, price, p.shares, p.cash, p.high_water_mark,
+            balance(&f.y.svm, f.y.assets), balance(&f.y.svm, f.y.reserve));
+        previous_price = price;
+    }
+    assert_eq!(f.state().shares, 0);
+    assert_eq!(f.state().cash, 0);
+    let shares = Mint::unpack(&f.y.svm.get_account(&f.y.shares_mint).unwrap().data).unwrap();
+    assert_eq!(shares.supply, 0);
+    println!("six-month final recipient atoms={:?}", f.paid());
+}
+
+#[test]
 fn accrual_frequency_and_price_changes_do_not_change_fees() {
     fn run(frequent: bool) -> ([u64; 3], [u128; 3]) {
         let mut f = FeeFixture::new();
