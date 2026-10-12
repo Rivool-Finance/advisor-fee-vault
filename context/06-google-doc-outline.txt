@@ -1,0 +1,68 @@
+PROJECT DETAILS — Rivool Finance (Colosseum Crypto World's Fair)
+Writing guide: notes under each field are what the answer must cover. Write the answers in our own words.
+Deadline: 13 Oct 2026, 03:59 BRT (06:59 UTC). Submit Sunday night.
+
+PROJECT NAME
+Rivool Finance
+
+BRIEF DESCRIPTION
+• One sentence: advisors (who) + dollar yield vault on Solana (what) + fees charged and split onchain + only the client can withdraw.
+• Avoid "best" and "few clicks".
+→ Answer:
+
+PROJECT WEBSITE
+https://rivool.finance
+
+WHAT ARE YOU BUILDING, AND WHO IS IT FOR?
+• Customer: Brazilian financial advisors and offices. End users: their clients (high-net-worth, mostly not crypto users).
+• Their problem: no way to offer onchain dollar yield without holding client funds or sending clients to self-serve.
+• What we built: Solana program; client deposits USDC; yield from an existing vault (Kamino or stand-in); office + advisor fees and Rivool's 15% of yield charged and split onchain; only the client withdraws.
+• New for the advisor: fees enforced by code, paid automatically, no billing, client keeps custody.
+• New for the client: every fee and the net yield visible onchain.
+→ Answer:
+
+WHY DID YOU DECIDE TO BUILD THIS, AND WHY NOW? (max 1000)
+• Insight: we already run the fee-based model offchain (daily accrual, collection at withdrawal, reconciliation). Where it breaks, what clients cannot check.
+• Distribution: advisors already bring clients. NUMBERS TO CONFIRM: offices __, advisors __, clients via advisors __, assets via advisors __.
+• Why Solana now: Ondo stocks, USDY and Kamino live there; per-client daily accrual is economical; next step is Ondo for qualified clients.
+→ Answer:
+
+WHAT TECHNOLOGIES ARE YOU USING OR INTEGRATING WITH?
+• Rust + Anchor; TypeScript + React; Privy embedded Solana wallets (restricted advisor signer); Kamino USDC vault or devnet stand-in; Squads; LiteSVM + Surfpool; GitHub; Claude Code.
+• Only list what works by Sunday. Remove Phantom/Solflare (unless used), Drift, "a confirmar".
+→ Answer:
+
+WHICH CHAINS DOES YOUR PRODUCT USE?
+Solana
+
+HOW DOES YOUR PRODUCT USE THESE CHAINS? (max 500)
+• Program holds positions and fee rules (ceilings, per-advisor rates).
+• Accrual from the vault share price, high-water mark for the performance fee.
+• One transaction pays office, advisor and Rivool.
+• No admin path to client funds; upgrade authority on Squads.
+• One concrete Solana reason (cost per accrual and settlement across an advisory book).
+→ Answer:
+
+CATEGORY: DeFi
+MOBILE-FOCUSED: No
+LOCATION: Brazil
+TELEGRAM: ________
+
+NOTES FOR JUDGES
+Did anyone not listed do meaningful work?
+• Only if relevant: advice from a Solana vault specialist (advice, not code).
+Anything else judges should know? (prior work, required)
+• Before 14 Sep, separate private codebase: dollar yield on Base via Deframe into Morpho vaults; Stellar with Blend; Ondo stocks on BSC and Ethereum; PIX on/off-ramp; Privy wallets; advisor and office network; offchain fee engine.
+• New in the window: everything on Solana (program, tests, advisor and client screens, wallet setup).
+→ Answer:
+
+MEDIA AND CODE
+• Logo: PNG/JPEG, under 0.5 MB.
+• GitHub: new repo for the Solana build only; commits dated inside the window; README with what was built when.
+• Repo context (max 500): what is here vs elsewhere; contact via Arena.
+• Demo video (max 3 min), shots: 1 advisor fee rejected above ceiling, then valid · 2 invite, client opens with embedded wallet · 3 deposit 1,000 USDC · 4 time passes, gross yield then fees · 5 settle: one tx, three transfers, explorer · 6 advisor tries to withdraw, rejected · 7 client withdraws, net vs gross yield.
+• Pitch video (2–3 min): advisor problem + numbers (0:30) · fee vault and why onchain (1:00) · business and roadmap to Ondo on Solana (0:45) · team.
+• X: https://x.com/rivool_finance
+
+BEFORE WRITING
+1. Confirm network numbers.  2. Decide fee design (at 4% yield, client keeps ~2.4%).  3. Specialist's answer on Kamino vs stand-in.
