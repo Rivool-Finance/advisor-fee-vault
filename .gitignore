@@ -43,3 +43,6 @@ pnpm-debug.log*
 
 # Logs
 *.log
+
+# Local validator/demo state and signing keys
+.local/
