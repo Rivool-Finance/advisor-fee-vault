@@ -172,6 +172,104 @@ a future timer-triggered run and long-term unattended reliability are not yet ob
 GitHub may delay scheduled jobs. Normal billing remains 30 days; this deployed
 configuration intentionally uses the labelled 60-second demo interval.
 
+## Additional public devnet operations
+
+Verified at **2026-10-12 23:17:56 UTC**, using the existing mock mint, client,
+position and unchanged price 1.04. The real billing interval remained 60 seconds.
+Both deployed program byte sequences still match the rebuilt SBF artifacts and
+hashes recorded in [the public operation record](evidence/devnet-operations-2026-10-12.json).
+No program upgrade, new mint funding, price change or authority change was performed.
+
+| Confirmed operation | Result | Transaction |
+|---|---|---|
+| top-up 200 mock USDC | 200.000000 deposited; pre-existing accrued office/advisor fees of 85/128 atoms settled first | [Explorer](https://explorer.solana.com/tx/3NPeN8NcQyKsmB1iNWsjTacNKZmM5RVxUtASS9Cv72RT4NaGxNmtYnScAW9K5ktM5nsLdt24W4uiswB6ZAubUjXu?cluster=devnet) |
+| partial withdrawal 50 receipt tokens | 50 receipt tokens redeemed; client received 52.000000 | [Explorer](https://explorer.solana.com/tx/3F5f7Z7F73DrvTu3dZkCv2e9vtRNgkL4GNRutv5HaE4je5ntLvoJcci6n9MTW7vhuvLTDVh6y1VAiG4R719RRfGD?cluster=devnet) |
+| permissionless keeper settlement | SOL-only keeper paid office/advisor 2/3 atoms; no performance gain | [Explorer](https://explorer.solana.com/tx/35Qw92HwhwE3rDB8aWWEH5MvUvJeEuvgPGoSDPmNgyr2d6qgeUZDTSdneYXRMXEGXBcyk5dsVdfULC32RC3cAaHi?cluster=devnet) |
+| client full exit | Client received 247.999779; custody and position cash reached zero | [Explorer](https://explorer.solana.com/tx/oxVRkZw6rb6coKNuPySiU5tPD9Yeccw6ySyrzSZVsMw5uCdrB9KfWVbnh5mjCVGHkRrK3AApgMcaA62sxDKyE5m?cluster=devnet) |
+| redeposit 100 mock USDC for hourly keeper | 100.000000 deposited; position remains funded for the hourly keeper | [Explorer](https://explorer.solana.com/tx/4y6Z3rcrDqWrp3zwKAV4XqnAJiFWEsut3cHQzJtCuSurMA6TLPickjaLtjTUSv3BazbwkqVkKupSk5GjBCE5XmXv?cluster=devnet) |
+
+Confirmed inner transfers and signer lists were independently fetched from RPC.
+The keeper was the sole signer of its settlement. Exit transaction post-balances
+show zero receipt custody and fee-vault cash; the script also checked zero position
+shares/cash before redepositing. Across the sequence, office/advisor received
+87/131 atoms total and Rivool received zero at the unchanged high-water price.
+
+Final mock-token balances reconcile exactly to the unchanged **1,040.000000 supply**:
+
+| Holder | Mock-USDC atoms |
+|---|---:|
+| Client wallet | 933,999,757 |
+| Office | 96 |
+| Advisor | 145 |
+| Rivool | 6,000,000 |
+| Source reserve (includes the new deposit) | 100,000,002 |
+| Fee-vault cash / admin wallet | 0 |
+| **Total** | **1,040,000,000** |
+
+The position holds 96,153,846 receipt atoms with zero position cash. These are
+checkpoint balances; subsequent hourly settlements may change them. This keeper
+execution was local against public devnet, not a GitHub Actions dispatch.
+
+The public RPC returned HTTP 429 after all five transactions confirmed. The
+journal was preserved and read-only verification completed without resending any
+transaction. The retained [operation script](../scripts/devnet-operations.ts)
+refuses a second mutation run against an existing journal. To recheck this run
+using its ignored local state and journal:
+
+```sh
+STATE_DIR=.local/devnet node scripts/devnet-operations.ts --verify
+```
+
+This is a fixed scenario for the existing deployment, not a generic bootstrap or
+resumable transaction runner. A partially completed mutation sequence needs
+onchain inspection before recovery. Public evidence contains no signer keys.
+
+## Six-month accounting simulation (180 days)
+
+Executed on 2026-10-12 against rebuilt SBF binaries matching the public devnet
+programs. Source baseline: `bee64519ecd86e627f98f2ebcb12e777412d9668` plus this change; the added test is
+[`six_month_operations_conserve_tokens_and_preserve_loss_high_water_mark`](../tests/svm/tests/programs.rs).
+This is a local LiteSVM clock simulation, **not six months elapsed on devnet**.
+Each month is 30 days at the previous price, followed by the price change and settlement.
+Annual rates remain 40/60 bps and performance fees remain 15% above the high-water mark.
+
+The fixture starts with 1,700 mock tokens: 1,000 deposited, 500 reserved for a top-up,
+and 200 available for backing. It transfers 40 tokens into the reserve before each
+price increase in months 1, 4, 5 and 6 (160 total); no tokens are created mid-run.
+
+| Month | Closing price | Office fee | Advisor fee | Performance fee | Operation after settlement |
+|---|---:|---:|---:|---:|---|
+| 1 | 1.04 | 0.328767 | 0.493150 | 6.000000 | Hold |
+| 2 | 0.98 | 0.339675 | 0.509513 | 0 | Top up 500 |
+| 3 | 1.00 | 0.484182 | 0.726274 | 0 | Hold |
+| 4 | 1.04 | 0.493666 | 0.740499 | 4.588138 | Withdraw 25% of remaining shares |
+| 5 | 1.08 | 0.383624 | 0.575436 | 6.731861 | Hold |
+| 6 | 1.10 | 0.395850 | 0.593775 | 3.344567 | Full exit |
+
+The loss does not reduce the existing position's high-water mark. The month-2
+top-up blends it to 1.019629563163 without charging performance on the deposit;
+month-4 recovery crosses that blended basis and therefore earns a performance fee.
+Every month checks exact integer fees with fractional carry, custody balances,
+conservation, and rejection of an immediate duplicate settlement.
+
+Final balances reconcile to **1,700.000000 tokens**: client wallet 1,650.959044,
+office 2.425764, advisor 3.638647, Rivool 20.664566, and source reserve 22.311979.
+The reserve balance is unused fixture backing, not merely rounding dust. Client
+shares, position cash, fee-vault cash and receipt supply are zero after exit.
+The wallet balance includes unused fixture capital and the earlier partial payout.
+
+Reproduce the simulation with:
+
+```sh
+NO_DNA=1 anchor build
+cargo test -p vault-svm-tests --locked six_month -- --nocapture
+```
+
+The [captured simulation output](evidence/six-month-simulation-2026-10-12.txt) records
+each checkpoint. The full validation passed: 10 math tests, 23 LiteSVM tests, six Node tests,
+TypeScript type checking, Rust formatting, and Clippy with warnings denied.
+IDL regeneration and `Cargo.lock` produced no changes.
+
 ## Remaining team work and limitations
 
 Team recording, final claim reconciliation, application and submission remain

@@ -8,11 +8,12 @@ Implemented: protected configuration, accepted-term snapshots, client deposits a
 withdrawals, time-weighted advisory accrual, atomic three-recipient settlement,
 a permissionless keeper, CLI demo, and a Squads authority handoff.
 
-**Verified:** 32 Rust tests, six Node tests, and the complete 1,000-token demo on
+**Verified:** 33 Rust tests, six Node tests, and the complete 1,000-token demo on
 both a local validator and public devnet. Devnet bytecode matches the tested binaries;
 office/config and both upgrade authorities now belong to a 2-of-3 Squads vault.
 The hourly keeper workflow is active on `main`; a manually dispatched hosted run
-settled a funded devnet position successfully.
+settled a funded devnet position successfully. Additional devnet operations and a
+separate six-month LiteSVM simulation verify top-ups, withdrawals and conservation.
 See [transaction evidence and operations status](context/08-implementation-evidence.md).
 
 ## Repository map

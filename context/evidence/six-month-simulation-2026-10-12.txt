@@ -1,0 +1,12 @@
+Local LiteSVM; six 30-day months; no public-network time acceleration.
+Source baseline: bee64519ecd86e627f98f2ebcb12e777412d9668 plus the six-month test in this change.
+Command: cargo test -p vault-svm-tests --locked six_month -- --nocapture
+month=1 price=1040000000000 fees=[328767, 493150, 6000000] action=settle shares=993440464 cash=0 hwm=1040000000000 client=660000000 reserve=1033178083 conserved=1700000000
+month=2 price=980000000000 fees=[339675, 509513, 0] action=top-up 500 shares=1502778026 cash=0 hwm=1019629563163 client=160000000 reserve=1532328895 conserved=1700000000
+month=3 price=1000000000000 fees=[484182, 726274, 0] action=settle shares=1501567570 cash=0 hwm=1019629563163 client=160000000 reserve=1531118439 conserved=1700000000
+month=4 price=1040000000000 fees=[493666, 740499, 4588138] action=withdraw 25% of shares shares=1121976901 cash=0 hwm=1040000000000 client=508951992 reserve=1176344144 conserved=1700000000
+month=5 price=1080000000000 fees=[383624, 575436, 6731861] action=settle shares=1114855677 cash=0 hwm=1080000000000 client=468951992 reserve=1208653223 conserved=1700000000
+month=6 price=1100000000000 fees=[395850, 593775, 3344567] action=full exit shares=0 cash=0 hwm=1100000000000 client=1650959044 reserve=22311979 conserved=1700000000
+six-month final recipient atoms=[2425764, 3638647, 20664566]
+test six_month_operations_conserve_tokens_and_preserve_loss_high_water_mark ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.43s
