@@ -1,0 +1,24 @@
+[package]
+name = "advisor-fee-vault"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "advisor_fee_vault"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build", "stand-in-yield/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+stand-in-yield = { path = "../stand-in-yield", features = ["cpi"] }
+
+[lints]
+workspace = true

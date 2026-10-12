@@ -1,0 +1,45 @@
+name: Devnet fee keeper
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devnet-fee-keeper
+  cancel-in-progress: false
+
+jobs:
+  settle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: devnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.6.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Settle eligible positions
+        env:
+          RPC_URL: ${{ vars.DEVNET_RPC_URL || 'https://api.devnet.solana.com' }}
+          KEEPER_KEYPAIR_JSON: ${{ secrets.KEEPER_KEYPAIR_JSON }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export KEEPER_KEYPAIR="$RUNNER_TEMP/keeper-keypair.json"
+          node --input-type=module -e '
+            import { writeFileSync } from "node:fs";
+            const secret = process.env.KEEPER_KEYPAIR_JSON;
+            if (!secret) throw new Error("Configure the devnet environment KEEPER_KEYPAIR_JSON secret");
+            writeFileSync(process.env.KEEPER_KEYPAIR, secret, { mode: 0o600, flag: "wx" });
+          '
+          unset KEEPER_KEYPAIR_JSON
+          npm run keeper
+      - name: Remove temporary key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/keeper-keypair.json"

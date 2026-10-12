@@ -1,0 +1,21 @@
+[workspace]
+members = ["programs/*", "tests/svm"]
+resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = { version = "=1.2.1", default-features = false, features = ["solana-v4"] }
+# Anchor's token-account init macro also references its Token-2022 helpers.
+anchor-spl = { version = "=1.2.1", default-features = false, features = ["solana-v4", "token", "token_2022", "token_2022_extensions"] }
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))', 'cfg(feature, values("anchor-debug", "custom-heap", "custom-panic"))'] }
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1

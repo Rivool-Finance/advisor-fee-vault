@@ -1,0 +1,14 @@
+[toolchain]
+anchor_version = "1.2.1"
+solana_version = "4.3.0"
+
+[programs.localnet]
+stand_in_yield = "4ywtd7N6oR52qPRiZ66mX76HPpjHAXiCYqoyaNVFF1xh"
+advisor_fee_vault = "F4Q5gatG2GjEt8L62Q71z7jctaitHRxunJDDnbdo6oXm"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --workspace --locked"

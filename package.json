@@ -1,0 +1,37 @@
+{
+  "name": "advisor-fee-vault",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "idl": "node scripts/sync-idl.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test scripts/*.test.ts",
+    "bootstrap": "node scripts/bootstrap.ts",
+    "demo": "node scripts/demo.ts",
+    "inspect": "node scripts/inspect.ts",
+    "keeper": "node scripts/keeper.ts",
+    "deploy": "bash scripts/deploy.sh",
+    "governance": "node scripts/governance.ts",
+    "squads:create": "bash scripts/create-squads.sh",
+    "validator": "bash scripts/validator.sh",
+    "governance:smoke": "node scripts/governance-smoke.ts",
+    "verify:demo": "node scripts/verify-evidence.ts"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "1.2.1",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.99.0",
+    "@sqds/multisig": "2.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.0",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "toml": "4.2.0",
+    "jayson": "5.0.0"
+  }
+}
