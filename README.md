@@ -8,10 +8,12 @@ Implemented: protected configuration, accepted-term snapshots, client deposits a
 withdrawals, time-weighted advisory accrual, atomic three-recipient settlement,
 a permissionless keeper, CLI demo, and a Squads authority handoff.
 
-**Verified locally:** 32 Rust tests, TypeScript checks and worker tests, a complete
-1,000-token demo, token conservation, and 2-of-3 Squads execution using the official
-program cloned from devnet. **Devnet deployment and hosted scheduling are not yet
-verified.** See [evidence and remaining gates](context/08-implementation-evidence.md).
+**Verified:** 32 Rust tests, six Node tests, and the complete 1,000-token demo on
+both a local validator and public devnet. Devnet bytecode matches the tested binaries;
+office/config and both upgrade authorities now belong to a 2-of-3 Squads vault.
+The hourly keeper workflow is active on `main`; a manually dispatched hosted run
+settled a funded devnet position successfully.
+See [transaction evidence and operations status](context/08-implementation-evidence.md).
 
 ## Repository map
 
@@ -91,7 +93,13 @@ to repeat. Do not delete a devnet key directory after deployment.
 ## Devnet deployment
 
 The declared IDs are `F4Q5gatG2GjEt8L62Q71z7jctaitHRxunJDDnbdo6oXm` (fee vault) and
-`4ywtd7N6oR52qPRiZ66mX76HPpjHAXiCYqoyaNVFF1xh` (stand-in). IDs alone do not prove deployment.
+`4ywtd7N6oR52qPRiZ66mX76HPpjHAXiCYqoyaNVFF1xh` (stand-in). Both were deployed and
+verified on 2026-10-12. The mock-USDC mint is
+`HFPqYKUp4fgcuQg2AndhkKJaadENJGajs72BQoyqK4mU`.
+
+The following is the initial deployment sequence, already completed for these IDs.
+Bootstrap and the one-shot demo are not rerunnable after the governance handoff;
+use `inspect` for the existing deployment and a fresh local ledger for another demo.
 
 ```sh
 export STATE_DIR=.local/devnet
@@ -126,6 +134,10 @@ then atomically moves office/config authority and both upgrade authorities to va
 index 0. Rerunning it verifies an already-completed transfer. Initial key custody is
 on this machine, not distributed among three people; arrange a secure team handoff.
 
+Verified devnet multisig: `G4R896v89tFLL2WHH3keg4VKGz16bjYtK7QxhC7nkLxX`.
+Its vault `7ToafrEJ444XHaz2yGeMJFwZzXxYxzyimpxBk57HRr7y` holds all four
+authorities. The mock mint and exchange-rate fixture remain deployer-controlled.
+
 For the local governance smoke test, start a fresh validator with the official
 Squads program and config cloned from devnet:
 
@@ -147,6 +159,12 @@ and optionally variable `DEVNET_RPC_URL`. Upload the ignored **keeper** key file
 never an admin, client, or multisig key. Scheduling begins only after the workflow
 is on the repository's default branch and the secret is configured. No GitHub
 environment or repository-admin permission is required.
+
+The deployed keeper is funded and its repository secret is configured. A 100-mock-USDC
+position remains funded for hourly settlement. The hosted run and transaction proof
+are linked in [implementation evidence](context/08-implementation-evidence.md).
+Monitor Actions failures and top up the keeper when its devnet SOL runs low; scheduled
+execution times are best-effort.
 
 The worker discovers funded positions, reads the chain clock, and settles those
 whose billing interval elapsed. A timeout triggers an onchain state check; it never

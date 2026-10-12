@@ -99,3 +99,13 @@ enforcement does not establish independent human custody.
 
 Kamino, Privy, product UI, fiat, other strategies, and mainnet are deferred. No CPI
 compatibility with Kamino is claimed.
+
+## Verified devnet authority ownership
+
+On 2026-10-12, config, office and both upgrade authorities were transferred atomically
+to Squads vault `7ToafrEJ444XHaz2yGeMJFwZzXxYxzyimpxBk57HRr7y`, belonging to
+2-of-3 multisig `G4R896v89tFLL2WHH3keg4VKGz16bjYtK7QxhC7nkLxX`. There is no
+Squads config authority. The deployed mint is
+`HFPqYKUp4fgcuQg2AndhkKJaadENJGajs72BQoyqK4mU`; mint and source-price fixture
+authority remain with deployer `AVUogj2RciV8GyqVqsdsy3J5HRDouY2JJnQcYKFbrmJX`.
+See [public transaction evidence](08-implementation-evidence.md).

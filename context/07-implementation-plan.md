@@ -144,10 +144,11 @@ First increment, 2026-10-12:
 - [x] Implement atomic three-way settlement and client deposit/withdrawal through the fee vault.
 - [x] Implement the TypeScript client/demo, monthly keeper, and their tests; execute the real-clock local demo.
 - [x] Verify the Squads CLI, atomic authority handoff and one-vs-two approval behavior against the official program on a local validator.
-- [ ] Activate the hosted keeper and verify its GitHub Actions run.
-- [ ] Configure Squads governance, deploy to devnet, and record transaction evidence.
+- [x] Activate the hosted keeper and verify its GitHub Actions run.
+- [x] Configure Squads governance, deploy to devnet, and record transaction evidence.
 
-The build, accounting, behavior and local operations gates now pass. See
+The build, accounting, behavior and devnet gates now pass. See
 [implementation evidence](08-implementation-evidence.md) for test results, local
-transaction signatures and remaining release gates. Public deployment and automated
-hosted operation are not yet complete. The full goal remains open.
+and public transaction signatures and hosted keeper evidence. All implementation
+release gates are complete. The team retains responsibility for recording, final
+application claims and submission; those are not automated implementation tasks.

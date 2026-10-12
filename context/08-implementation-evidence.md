@@ -1,7 +1,7 @@
 # Implementation evidence
 
-Recorded 2026-10-12. This separates implemented behavior from release gates that
-still require a public network or repository operation.
+Recorded 2026-10-12. Local tests, public devnet transactions and hosted operations
+are identified separately below.
 
 ## Build and local checks
 
@@ -77,28 +77,107 @@ a8b66af02b832c23c8f5da973af1fc0c6934f141bbc4b592af7864d60a5900ba  advisor_fee_va
 7c1964a72992992a850cd331e0f75c71707edaf4a5ba94e0995b1c3f76dd5b71  stand_in_yield.so
 ```
 
-These identify the local binaries; they are not proof of a reproducible/verifiable
-build or a public deployment.
+Both public devnet ProgramData accounts were fetched on 2026-10-12 at 21:21 UTC.
+Their executable bytes match these local artifacts byte for byte. This comparison
+is not an independent reproducible-build attestation or security audit.
 
-## Outstanding release gates
+## Public devnet deployment and demo
 
-- [ ] Fund deployer `AVUogj2RciV8GyqVqsdsy3J5HRDouY2JJnQcYKFbrmJX` with devnet SOL.
-- [ ] Deploy both programs, bootstrap, run and independently verify the public demo.
-- [ ] Create devnet Squads with the requested CLI and transfer/verify all authorities.
-- [x] Publish the implementation and workflows in [draft PR #1](https://github.com/Rivool-Finance/advisor-fee-vault/pull/1).
-- [x] Configure repository Actions secret `KEEPER_KEYPAIR_JSON` for the SOL-only
-  signer `2G5Ls118SBL2hieCUuiJmFTxjp2PE1qH1su6dapsvG5k` (2026-10-12).
-- [ ] Fund the keeper, publish its workflow on the default branch, and confirm a hosted settlement run.
-- [ ] Team recording, claim reconciliation, application and submission.
+The user funded the correct deployer with 20 devnet SOL through DevnetFaucet.org.
+The earlier CLI/PoW funding failures are resolved. Both deployments use Solana devnet
+(genesis `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`):
 
-The CLI faucet rejected requests for 2, 1 and 0.001 SOL. The installed `devnet-pow`
-0.1.4 reports the suggested difficulty-3/0.02-SOL pool empty. Its mining command also failed on the initial bootstrap airdrop.
-No discovered faucet can currently fund a deployment at its advertised reward. No real funds, mainnet deployment, Colosseum edits or messages were sent.
+| Artifact | Address |
+|---|---|
+| Fee program | `F4Q5gatG2GjEt8L62Q71z7jctaitHRxunJDDnbdo6oXm` |
+| Stand-in program | `4ywtd7N6oR52qPRiZ66mX76HPpjHAXiCYqoyaNVFF1xh` |
+| Mock-USDC mint | `HFPqYKUp4fgcuQg2AndhkKJaadENJGajs72BQoyqK4mU` |
+| Vault | `8tBbjGVtPKGAjXXB7Megbw66JRVLgLG5xbE22jcgxG1t` |
+| Client position | `F2vFWqun31BmqXp7jVuQySYMUutPoJQ4XBpUZLzLCdk9` |
+
+- [Deploy stand-in](https://explorer.solana.com/tx/Mj23DKqP2P7rZB3Mo36jVqmRzDbcGDq91kPXpa24SbuiJn4HqAGJm5b1BkamUeci7iUXHpEF95JmxWxzMjVsBQX?cluster=devnet)
+- [Deploy fee vault](https://explorer.solana.com/tx/iEb565Biseytq9ndUa8mcSfzC6CEdrtnmPUAZtyWEiebyhPuCtwXnbaHLntgXg2d1doDiKuYvFSoS54TLWcuXjb?cluster=devnet)
+- [open](https://explorer.solana.com/tx/47ARDqcBK2waYdcs8327nhVuQqPuLL7nkboCHbQSEiz4d5rFazpgGZR1SqGKquUvEGD8YYCnDLfGPDuHxX6VGWjw?cluster=devnet)
+- [deposit 1000 mock USDC](https://explorer.solana.com/tx/3szouWLmDErtJTnGrqbQ59hET6cCv7uRNhnKnddjMFHtVcBURkJDXpdNADBXTrAkCx76xorYrFFzNnn5t75f7Qc7?cluster=devnet)
+- [fund 40 mock USDC yield](https://explorer.solana.com/tx/2o727NeQRSCa2RHQuWAArfZ1QCmS3pjjpieYd6LtkkmyR2YsQXcPj93RXw3CshKy5zoe1bzHMxWF5cRuB7WKZA16?cluster=devnet)
+- [backed exchange rate 1.04](https://explorer.solana.com/tx/3moBrVeyafCwV3WBtaNbKzTK2sWEZxqhNPjYF3juojE6BMtJN9s8Whoo7oixBaEFyq8N6YjYJQ8jLsYf5cyfdA5c?cluster=devnet)
+- [keeper settlement](https://explorer.solana.com/tx/RYCrh6c2zPSBrTkpxanLYGAktbmVhv4vwb94foip4mm7cw1wpjBvLgZwTaL5M2MoapVuY7yKBUewJB4DXSKX2Nk?cluster=devnet)
+- [client full withdrawal](https://explorer.solana.com/tx/4kzHEYbfjmv2nJaqSFiSAt4wB3W1g1jh9EMtK5LnjC21H6VkDMtTPxgb4uwF3GyUp7ifTa8w3aHZjt9jVgbVNTLC?cluster=devnet)
+
+`npm run verify:demo` independently read every confirmed demo transaction and its
+inner token transfers at 21:20:35 UTC. The keeper paid 8 office atoms, 12 advisor
+atoms and 6,000,000 Rivool atoms. The withdrawal collected one additional advisor
+atom accrued since settlement. Final balances were:
+
+| Holder | Mock-USDC atoms |
+|---|---:|
+| Client | 1,033,999,978 |
+| Office | 8 |
+| Advisor | 13 |
+| Rivool | 6,000,000 |
+| Source reserve rounding dust | 1 |
+| Fee-vault cash | 0 |
+| **Total / mint supply** | **1,040,000,000** |
+
+Client shares, client cash and receipt supply were zero after exit. The live position
+was subsequently funded again with 100 mock USDC for hosted keeper verification;
+these exit balances describe the verified demo checkpoint, not the current position.
+Bootstrap encountered public-RPC 429 responses; idempotent retries after cooldown
+completed initialization without redeploying or duplicating initial mint funding.
+
+## Public devnet Squads governance
+
+- Multisig: `G4R896v89tFLL2WHH3keg4VKGz16bjYtK7QxhC7nkLxX`.
+- Authority vault (index 0): `7ToafrEJ444XHaz2yGeMJFwZzXxYxzyimpxBk57HRr7y`.
+- Threshold: **2 of 3**, three distinct full-permission members, no config authority.
+- [CLI creation](https://explorer.solana.com/tx/4pwcXRWnscxaxePQungQu8A7LvNDc9x9zY2cmMvNZAHja9Poc7Er5Y321iocqVjokbJMZsJdjbzRYprR4Ys1fvhG?cluster=devnet).
+- [Atomic authority handoff](https://explorer.solana.com/tx/4pgiSTMTJ4mvpvQsRobkDH92aCFjFkAro75hD3DMn7EPxwUZ22hapvbsV7DEx53oYcQMbfhrmooHn8jzL3YJtoKU?cluster=devnet).
+
+The script checked canonical Squads ownership, discriminator, PDA, threshold and
+membership, then reread config, office and both upgrade authorities after the
+handoff. All four equal the authority vault above. Member public keys:
+
+- `5oEoYne2AsKBoREh3D1rqugM3mFN5Dn15eYohbp9uGWk`
+- `5wfQZDSdbbZHucJo4WtYaezbffdMpyP7AWyqAx2Xzsqv`
+- `D4rBA8ACX3mWpDes8NqCygoDa2MjtnRjnWmqFw1zQ8vo`
+
+Private signer files remain ignored and protected on this machine. This is real
+onchain threshold governance, with centralized initial key custody. The one-vs-two
+approval execution test above was local; the public proof covers creation and handoff.
+
+## Hosted keeper
+
+[PR #1](https://github.com/Rivool-Finance/advisor-fee-vault/pull/1) was merged to
+`main` as `77a7aa8`. The hourly workflow is active, with repository secret
+`KEEPER_KEYPAIR_JSON` for SOL-only signer
+`2G5Ls118SBL2hieCUuiJmFTxjp2PE1qH1su6dapsvG5k`, funded by bootstrap.
+No admin, client or multisig key is used by Actions.
+
+The GitHub account has write access but cannot create repository environments.
+The keeper uses the repository secret directly; no environment protection rule
+was removed or bypassed.
+
+- [Hosted run](https://github.com/Rivool-Finance/advisor-fee-vault/actions/runs/38310296257): **passed**, dispatched against `main`.
+- [Confirmed settlement](https://explorer.solana.com/tx/3mdVRzT28uESen8Sg4zs99FDHo3EqUJ7CEE2ZctoPMYtPUgKMeuvFx9NTtxpDoqNuBoY23R1XtivmP4rFrH3EGC8?cluster=devnet).
+- Independent RPC verification at 21:24:04 UTC confirmed the keeper was the sole
+  signer, office/advisor each received one atom, and the position's settlement
+  timestamp advanced. No new performance gain arose at the unchanged price.
+- The complete mock-token supply still reconciled to 1,040,000,000 atoms. The
+  100-token test position remains funded for subsequent hourly runs.
+- Keeper balance after verification: **0.04999 devnet SOL**.
+
+The hourly cron (`17 * * * *`) is installed on the default branch and the workflow
+is active. The observed execution used manual dispatch of that same workflow;
+a future timer-triggered run and long-term unattended reliability are not yet observed.
+GitHub may delay scheduled jobs. Normal billing remains 30 days; this deployed
+configuration intentionally uses the labelled 60-second demo interval.
+
+## Remaining team work and limitations
+
+Team recording, final claim reconciliation, application and submission remain
+team-owned, as specified in the plan. The discrepancy checklist is prepared;
+no Colosseum application text, edits or messages were sent.
 
 The dependency audit retains one upstream native-addon issue (`bigint-buffer`),
 reported through four packages after adding Squads. Installation scripts are
 disabled and the tested JS fallback is used. This prototype has no independent audit.
-
-The GitHub account has write access but cannot create repository environments.
-The keeper now uses the repository secret directly; no environment protection rule
-was removed or bypassed. Devnet funding remains the deployment prerequisite.
