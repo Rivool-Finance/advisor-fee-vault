@@ -142,10 +142,11 @@ It proves one approval cannot execute and two approvals can. It is local-only.
 
 `.github/workflows/keeper.yml` runs hourly at minute 17 and supports manual dispatch.
 It serializes runs and uses a SOL-only signer without client or admin privileges.
-Configure the repository's `devnet` environment with secret `KEEPER_KEYPAIR_JSON`
+Configure repository Actions secret `KEEPER_KEYPAIR_JSON`
 and optionally variable `DEVNET_RPC_URL`. Upload the ignored **keeper** key file,
 never an admin, client, or multisig key. Scheduling begins only after the workflow
-is on the repository's default branch and the environment is configured.
+is on the repository's default branch and the secret is configured. No GitHub
+environment or repository-admin permission is required.
 
 The worker discovers funded positions, reads the chain clock, and settles those
 whose billing interval elapsed. A timeout triggers an onchain state check; it never

@@ -3,8 +3,10 @@
 Recorded 2026-10-12. This separates implemented behavior from release gates that
 still require a public network or repository operation.
 
-## Local checks
+## Build and local checks
 
+- [Hosted CI passed for `bd7e98c`](https://github.com/Rivool-Finance/advisor-fee-vault/actions/runs/38306473098),
+  including a clean build, all 38 tests, generated-IDL checks and the real-clock demo.
 - Both SBF programs build with Anchor 1.2.1 and Agave 4.3.0.
 - The deployment script uploaded both binaries to an empty local ledger using
   explicit buffer keypairs and recorded their program/authority metadata.
@@ -83,7 +85,10 @@ build or a public deployment.
 - [ ] Fund deployer `AVUogj2RciV8GyqVqsdsy3J5HRDouY2JJnQcYKFbrmJX` with devnet SOL.
 - [ ] Deploy both programs, bootstrap, run and independently verify the public demo.
 - [ ] Create devnet Squads with the requested CLI and transfer/verify all authorities.
-- [ ] Publish the workflow, configure its SOL-only keeper secret, and confirm a hosted run.
+- [x] Publish the implementation and workflows in [draft PR #1](https://github.com/Rivool-Finance/advisor-fee-vault/pull/1).
+- [x] Configure repository Actions secret `KEEPER_KEYPAIR_JSON` for the SOL-only
+  signer `2G5Ls118SBL2hieCUuiJmFTxjp2PE1qH1su6dapsvG5k` (2026-10-12).
+- [ ] Fund the keeper, publish its workflow on the default branch, and confirm a hosted settlement run.
 - [ ] Team recording, claim reconciliation, application and submission.
 
 The CLI faucet rejected requests for 2, 1 and 0.001 SOL. The installed `devnet-pow`
@@ -93,3 +98,7 @@ No discovered faucet can currently fund a deployment at its advertised reward. N
 The dependency audit retains one upstream native-addon issue (`bigint-buffer`),
 reported through four packages after adding Squads. Installation scripts are
 disabled and the tested JS fallback is used. This prototype has no independent audit.
+
+The GitHub account has write access but cannot create repository environments.
+The keeper now uses the repository secret directly; no environment protection rule
+was removed or bypassed. Devnet funding remains the deployment prerequisite.

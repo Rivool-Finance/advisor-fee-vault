@@ -16,7 +16,6 @@ jobs:
   settle:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    environment: devnet
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +34,7 @@ jobs:
           node --input-type=module -e '
             import { writeFileSync } from "node:fs";
             const secret = process.env.KEEPER_KEYPAIR_JSON;
-            if (!secret) throw new Error("Configure the devnet environment KEEPER_KEYPAIR_JSON secret");
+            if (!secret) throw new Error("Configure the repository KEEPER_KEYPAIR_JSON secret");
             writeFileSync(process.env.KEEPER_KEYPAIR, secret, { mode: 0o600, flag: "wx" });
           '
           unset KEEPER_KEYPAIR_JSON
