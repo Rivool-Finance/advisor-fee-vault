@@ -43,4 +43,6 @@ Use rustfmt, surrounding two-space TypeScript formatting, descriptive test names
 
 Use `feat:`, `docs:` or `chore:` subjects. PRs explain behavior, validation and limitations; link issues and include screenshots for visual changes.
 
+**Before planning a fix or a feature, search the open PRs** for the same problem and for the files you would touch: `gh pr list --state open --search "<problem>" --json number,title,files`. If one already does it, say so, and review or join it instead of planning a second.
+
 Never commit secrets or keypairs; protect private files under ignored paths. Give Actions only the SOL-only keeper signer. Put transaction history in the evidence document and durable operating rules here.
