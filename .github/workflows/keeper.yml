@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   settle:
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: rivool-aws-public-ec2
+      labels: rivool-aws-public-linux
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,43 @@
+name: AWS public runner canary
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  public-runner-smoke:
+    if: github.ref == 'refs/heads/main'
+    runs-on:
+      group: rivool-aws-public-ec2
+      labels: rivool-aws-public-linux
+    timeout-minutes: 10
+    env:
+      AWS_DEFAULT_REGION: us-east-1
+    steps:
+      - name: Verify isolated worker identity and runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ENVIRONMENT" = self-hosted
+          token=$(curl --noproxy '*' --fail --silent --show-error --max-time 5 -X PUT \
+            -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' http://169.254.169.254/latest/api/token)
+          instance=$(curl --noproxy '*' --fail --silent --show-error --max-time 5 \
+            -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/instance-id)
+          unset token
+          [[ "$instance" =~ ^i-[0-9a-f]{17}$ ]]
+          test "$(aws sts get-caller-identity --query Account --output text)" = 377669300258
+          test "$(aws sts get-caller-identity --query Arn --output text)" = \
+            "arn:aws:sts::377669300258:assumed-role/rivool-public-linux-runner-510f38ea/$instance"
+          command -v git node docker aws
+          docker info >/dev/null
+          if result=$(aws ec2 terminate-instances --instance-ids "$instance" --dry-run 2>&1); then
+            echo '::error::Self-termination dry-run unexpectedly succeeded'; exit 1
+          fi
+          case "$result" in *DryRunOperation*) ;; *) echo '::error::Self-termination permission was not verified'; exit 1 ;; esac
+          if result=$(aws ec2 describe-instances --instance-ids "$instance" 2>&1); then
+            echo '::error::Public worker unexpectedly has EC2 inventory access'; exit 1
+          fi
+          case "$result" in *UnauthorizedOperation*|*AccessDenied*) ;; *) echo '::error::EC2 inventory denial was not verified'; exit 1 ;; esac
+          unset result
+          echo 'Verified isolated public worker identity, Docker, self-termination permission and inventory denial.'
