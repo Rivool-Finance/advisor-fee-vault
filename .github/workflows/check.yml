@@ -9,15 +9,21 @@ permissions:
 
 jobs:
   programs:
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: rivool-aws-public-ec2
+      labels: rivool-aws-public-linux
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: 1.99.0
+          components: rustfmt, clippy
       - name: Install pinned toolchains
         shell: bash
         run: |
           set -euo pipefail
-          rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
           curl --fail --location --silent --show-error \
             https://github.com/otter-sec/anchor/releases/download/v1.2.1/anchor-1.2.1-x86_64-unknown-linux-gnu \
             -o "$RUNNER_TEMP/anchor"
